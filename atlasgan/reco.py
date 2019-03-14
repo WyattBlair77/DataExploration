@@ -31,18 +31,14 @@ def reconstruct_jets(image, eta_range=(-2.5, 2.5), phi_range=(-np.pi, np.pi)):
 
     clusters = np.zeros(eta.shape[0] * phi.shape[0], dtype=DTYPE_PTEPM)
     E = image.T
-    print("len e: " + str(len(E)))
     clusters['pT'] = E.ravel()
     clusters['eta'] = X.ravel()
     clusters['phi'] = Y.ravel()
     clusters['pT'] = clusters['pT'] / np.cosh(clusters['eta'])
-    event = clusters[clusters['pT']>0.1]
-    print("len event: " + str(len(event)))
-    sequence = cluster(event, R=1.0, p=-1)
-    jets = sequence.inclusive_jets(ptmin=29.9)
-    print("len jets1: " + str(len(jets)))
+    event = clusters[clusters['pT']>1]
+    sequence = cluster(event, R=0.4, p=-1)
+    jets = sequence.inclusive_jets(ptmin=0.0)
     jets = [jet for jet in jets if (abs(jet.eta) < 2.0)]
-    print("len jets2: " + str(len(jets)))
     return jets
 
 def build_jets_dataframe(event, jets):
