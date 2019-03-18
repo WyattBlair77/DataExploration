@@ -35,9 +35,9 @@ def reconstruct_jets(image, eta_range=(-2.5, 2.5), phi_range=(-np.pi, np.pi)):
     clusters['eta'] = X.ravel()
     clusters['phi'] = Y.ravel()
     clusters['pT'] = clusters['pT'] / np.cosh(clusters['eta'])
-    event = clusters[clusters['pT']>1]
+    event = clusters[clusters['pT']>0]
     sequence = cluster(event, R=0.4, p=-1)
-    jets = sequence.inclusive_jets(ptmin=0.0)
+    jets = sequence.inclusive_jets(ptmin=20)
     jets = [jet for jet in jets if (abs(jet.eta) < 2.0)]
     return jets
 
