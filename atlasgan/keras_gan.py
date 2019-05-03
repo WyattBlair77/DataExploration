@@ -40,7 +40,7 @@ class GAN():
         self.generator = self.build_generator()
 
         # The generator takes noise as input and generates imgs
-        z = Input(shape=(64,))
+        z = Input(shape=(1, 64))
         img = self.generator(z)
 
         # For the combined model we will only train the generator
@@ -157,14 +157,40 @@ class GAN():
 #         img = model(noise)
 
 #         return Model(noise, img)
+#         noise_vect_len = 64
+        
+#         gmodel = Sequential()
+
+#         gmodel.add(Dense(64*64, input_shape=(self.img_rows, self.img_cols, 1)))
+#         gmodel.add(BatchNormalization())
+#         gmodel.add(Activation('relu'))
+# #         gmodel.summary()
+#         gmodel.add(Reshape((64,64,64*64)))
+#         gmodel.add(Conv2DTranspose(128,5,strides=2, padding='same'))
+#         gmodel.add(BatchNormalization())
+#         gmodel.add(Activation('relu'))
+#         gmodel.add(Conv2DTranspose(64,5,strides=2, padding='same'))
+#         gmodel.add(BatchNormalization())
+#         gmodel.add(Activation('relu'))
+#         gmodel.add(Conv2DTranspose(32,5,strides=2, padding='same'))
+#         gmodel.add(BatchNormalization())
+# #         gmodel.add(Activation('relu'))
+# #         gmodel.add(Conv2DTranspose(1,5,strides=2, padding='same'))
+#         gmodel.add(Activation('tanh'))
+
+#         gmodel.summary()
+
+#         noise = Input(shape=(self.img_rows, self.img_cols, 1))
+#         return Model(noise, gmodel(noise))
+
         noise_vect_len = 64
         
         gmodel = Sequential()
 
-        gmodel.add(Dense(8*8*256, input_shape=(1,noise_vect_len)))
+        gmodel.add(Dense(4*4*256, input_shape=(1,noise_vect_len)))
         gmodel.add(BatchNormalization())
         gmodel.add(Activation('relu'))
-        gmodel.add(Reshape((8,8,256)))
+        gmodel.add(Reshape((4,4,256)))
         gmodel.add(Conv2DTranspose(128,5,strides=2, padding='same'))
         gmodel.add(BatchNormalization())
         gmodel.add(Activation('relu'))
@@ -175,7 +201,7 @@ class GAN():
         gmodel.add(BatchNormalization())
         gmodel.add(Activation('relu'))
         gmodel.add(Conv2DTranspose(1,5,strides=2, padding='same'))
-        gmodel.add(Activation('tanh'))
+        gmodel.add(Activation('sigmoid'))
 
         gmodel.summary()
 
@@ -246,6 +272,34 @@ class GAN():
 #         validity = model(img)
 
 #         return Model(img, validity)
+#         dmodel = Sequential()
+        
+#         dmodel.add(Dense(64*64, input_shape = (self.img_rows, self.img_cols, 1)))
+#         dmodel.add(BatchNormalization())
+#         dmodel.add(Activation('relu'))
+#         dmodel.add(Reshape((8,8,64*64*64)))
+#         dmodel.add(Conv2D(filters=32, kernel_size=5, strides=2, padding='same', input_shape=(64,64,1)))
+#         dmodel.add(BatchNormalization())
+#         dmodel.add(LeakyReLU(alpha=0.2))
+#         dmodel.add(Conv2D(filters=64, kernel_size=5, strides=2, padding='same'))
+#         dmodel.add(BatchNormalization())
+#         dmodel.add(LeakyReLU(alpha=0.2))
+#         dmodel.add(Conv2D(filters=128, kernel_size=5, strides=2, padding='same'))
+#         dmodel.add(BatchNormalization())
+#         dmodel.add(LeakyReLU(alpha=0.2))
+#         dmodel.add(Conv2D(filters=256, kernel_size=5, strides=2, padding='same'))
+#         dmodel.add(BatchNormalization())
+#         dmodel.add(LeakyReLU(alpha=0.2))
+#         dmodel.add(Flatten())
+#         dmodel.add(Dense(1))
+#         dmodel.add(Activation('sigmoid'))
+
+#         dmodel.summary()
+
+#         img = Input(shape=(self.img_rows,self.img_cols, 1))
+
+#         return Model(img, dmodel(img))
+
         dmodel = Sequential()
 
         dmodel.add(Conv2D(filters=32, kernel_size=5, strides=2, padding='same', input_shape=(64,64,1)))
@@ -266,7 +320,7 @@ class GAN():
 
         dmodel.summary()
 
-        img = Input(shape=(128,128,1))
+        img = Input(shape=(64,64,1))
 
         return Model(img, dmodel(img))
 
@@ -277,7 +331,7 @@ class GAN():
         X_train = self.data
         
         # Rescale -1 to 1
-        X_train = np.multiply(X_train, 1. / (127.5 - 1.))
+#         X_train = np.multiply(X_train, 1. / (127.5 - 1.))
         X_train = np.expand_dims(X_train, axis=3)
 
         # Adversarial ground truths
@@ -294,10 +348,9 @@ class GAN():
             idx = np.random.randint(0, X_train.shape[0], batch_size)
             imgs = X_train[idx]
 
-            noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
-            print(noise.shape)
-            noise = expand_dims(noise, 0)
-            print(noise.shape)
+            noise = np.random.normal(0, 1, (batch_size, 1, 64))
+#             print(noise.shape)
+#             noise = expand_dims(noise, 0)
 
             # Generate a batch of new images
             gen_imgs = self.generator.predict(noise)
@@ -311,7 +364,7 @@ class GAN():
             #  Train Generator
             # ---------------------
 
-            noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
+            noise = np.random.normal(0, 1, (batch_size, 1, 64))
 
             # Train the generator (to have the discriminator label samples as valid)
             g_loss = self.combined.train_on_batch(noise, valid)
